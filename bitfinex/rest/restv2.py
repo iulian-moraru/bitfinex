@@ -2882,8 +2882,85 @@ class Client:
     def user_info(self):
         raise NotImplementedError
 
-    def transfer_between_wallets(self):
-        raise NotImplementedError
+    def transfer_between_wallets(self, from_wallet, to_wallet, **kwargs):
+        """`Bitfinex Transfer funds between wallets.
+        Can also be used to convert USDT to USDT0 for derivatives trading.
+        <https://docs.bitfinex.com/reference#rest-auth-transfer`_
+
+        Post transfer between wallets
+
+        Parameters
+        ----------
+        from_wallet : str
+            Select the wallet from which to transfer (exchange, margin, funding
+            (can also use the old labels which are exchange, trading and deposit respectively))
+
+        to_wallet: str
+            Select the wallet from which to transfer (exchange, margin, funding
+            (can also use the old labels which are exchange, trading and deposit respectively))
+
+        currency: str
+        Select the currency that you would like to transfer (USD, UST, BTC, ....)
+
+        currency_to: str
+            (optional) Select the currency that you would like to exchange to (USTF0 === USDT for derivatives pairs)
+
+        amount: str
+            Select the amount to transfer
+
+        email_dst: str
+            (optional) Allows transfer of funds to a sub- or master-account identified by the associated email address
+
+        Returns
+        -------
+        list
+             ::
+                [
+                  MTS,
+                  TYPE,
+                  MESSAGE_ID,
+                  null,
+                  [
+                    MTS_UPDATE,
+                    WALLET_FROM,
+                    WALLET_TO,
+                    _PLACEHOLDER,
+                    CURRENCY,
+                    CURRENCY_TO,
+                    _PLACEHOLDER,
+                    AMOUNT
+                  ]
+                  CODE,
+                  STATUS,
+                  TEXT
+                ]
+
+        //Transfer
+        [1568736745789,"acc_tf",null,null,[1568736745790,"margin","exchange",null,"USD",null,null,50],null,
+         "SUCCESS","50.0 US Dollar transferred from Margin to Exchange"]
+
+        //Transfer and conversion to USDT0
+        [1574173088379,"acc_tf",null,null,[1574173088379,"exchange","margin",null,"UST","USTF0",null,200],null,
+        "SUCCESS","200.0 Tether USDt transfered from Exchange to Margin"]
+
+        Example
+        -------
+         ::
+            bfx_client.transfer_between_wallets(from_wallet='margin',
+                                                to_wallet='exchange',
+                                                currency='USTF0',
+                                                currency_to='UST'
+                                                amount='1.31')
+        """
+        body = {
+            "from": from_wallet,
+            "to": to_wallet,
+            **kwargs
+        }
+        raw_body = json.dumps(body)
+        path = "v2/auth/w/transfer"
+        response = self._post(path, raw_body, verify=True)
+        return response
 
     def deposit_address(self):
         raise NotImplementedError

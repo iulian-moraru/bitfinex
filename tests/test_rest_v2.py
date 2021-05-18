@@ -1501,3 +1501,18 @@ def test_ledger_response(client, requests_mock):
     assert isinstance(l_response, list)
     assert l_response[0][1] == 'IOT'
     assert l_response[1][1] == 'IOT'
+
+def test_transfer_between_wallets(client, requests_mock):
+    response_text = json.dumps([])
+    requests_mock.register_uri(
+        rmock.ANY,
+        rmock.ANY,
+        text=response_text
+    )
+    client.transfer_between_wallets(from_wallet='margin',
+                                    to_wallet='exchange',
+                                    currency='USTF0',
+                                    amount='0.0001')
+    assert requests_mock.request_history[0].url == (
+        'https://api.bitfinex.com/v2/auth/w/transfer'
+    )
